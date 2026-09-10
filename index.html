@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Consistency — Habit Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <div class="brand">
+        <span class="brand-mark">✓</span>
+        <span class="brand-name">Consistency</span>
+      </div>
+      <nav class="nav">
+        <button id="theme-toggle" class="icon-btn" title="Toggle theme">🌙</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Hero / Stats -->
+    <section class="hero">
+      <div>
+        <h1>Build habits that <span class="accent">stick</span>.</h1>
+        <p class="subtitle">Track your daily habits, keep your streaks alive, and watch consistency compound.</p>
+      </div>
+      <div class="stats">
+        <div class="stat-card">
+          <span class="stat-value" id="stat-total">0</span>
+          <span class="stat-label">Habits</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="stat-done">0</span>
+          <span class="stat-label">Done Today</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="stat-streak">0</span>
+          <span class="stat-label">Best Streak</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="stat-rate">0%</span>
+          <span class="stat-label">Today's Rate</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Progress bar -->
+    <section class="progress-section">
+      <div class="progress-header">
+        <h2 id="today-date"></h2>
+        <span id="progress-text">0 of 0 completed</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+    </section>
+
+    <!-- Add habit -->
+    <section class="add-habit">
+      <form id="habit-form" autocomplete="off">
+        <input type="text" id="habit-input" placeholder="Add a new habit (e.g., Read 20 minutes)" maxlength="60" required />
+        <select id="habit-icon">
+          <option value="⭐">⭐</option>
+          <option value="📚">📚</option>
+          <option value="🏃">🏃</option>
+          <option value="💧">💧</option>
+          <option value="🧘">🧘</option>
+          <option value="💪">💪</option>
+          <option value="🥗">🥗</option>
+          <option value="😴">😴</option>
+          <option value="✍️">✍️</option>
+          <option value="💻">💻</option>
+        </select>
+        <button type="submit" class="btn-primary">+ Add Habit</button>
+      </form>
+    </section>
+
+    <!-- Habit list -->
+    <section>
+      <ul id="habit-list" class="habit-list"></ul>
+      <div id="empty-state" class="empty-state">
+        <p>🌱 No habits yet. Add your first one above and start your streak!</p>
+      </div>
+    </section>
+
+    <!-- Weekly overview -->
+    <section class="week-section">
+      <h2>Last 7 Days</h2>
+      <div id="week-grid" class="week-grid"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Consistency — small steps, every day. Data is stored locally in your browser.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
