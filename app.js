@@ -26,12 +26,17 @@ function streak(t) {
 // ---------- Form: show target input only when needed ----------
 const typeSelect = $("#tracker-type");
 const targetInput = $("#tracker-target");
-typeSelect.addEventListener("change", () => {
+const targetField = $("#target-field");
+
+function syncTargetField() {
   const needsTarget = ["target", "cheat"].includes(typeSelect.value);
-  targetInput.classList.toggle("hidden", !needsTarget);
+  targetField.classList.toggle("hidden", !needsTarget);
   targetInput.required = needsTarget;
-  targetInput.placeholder = typeSelect.value === "cheat" ? "Cheat days allowed / year" : "Yearly target (e.g., 10000)";
-});
+  targetField.querySelector(".field-label").textContent =
+    typeSelect.value === "cheat" ? "Cheat days per year" : "Yearly target";
+  targetInput.placeholder = typeSelect.value === "cheat" ? "e.g., 12" : "e.g., 10000";
+}
+typeSelect.addEventListener("change", syncTargetField);
 
 $("#tracker-form").addEventListener("submit", (e) => {
   e.preventDefault();
@@ -49,7 +54,7 @@ $("#tracker-form").addEventListener("submit", (e) => {
   });
   save(); render();
   e.target.reset();
-  targetInput.classList.add("hidden");
+  syncTargetField();
 });
 
 // ---------- Actions ----------
@@ -85,16 +90,23 @@ function render() {
   grid.innerHTML = "";
   const today = dateKey();
 
-  trackers.forEach((t) => {
-    const card = document.createElement("div");
-    card.className = "block tracker-card";
+  trackers.forEach((t, i) => {
+    const card = document.createElement("article");
+    card.className = "card tracker-card";
+    card.style.animationDelay = `${Math.min(i, 8) * 40}ms`;
     const badge = { check: "Daily", counter: "Counter", target: "Yearly Target", cheat: "Cheat Days", expense: "Expenses" }[t.type];
 
     let body = "", sub = "", foot = `<span class="streak-tag"></span>`;
 
     if (t.type === "check") {
       const done = !!t.history[today];
-      body = `<button class="btn-chip ${done ? "done" : ""}" data-a="check">${done ? "✓ Done today" : "Mark done"}</button>`;
+      const total = Object.keys(t.history).length;
+      body = `
+        <button class="btn-check ${done ? "is-done" : ""}" data-a="check">
+          <span class="check-circle">${done ? "✓" : ""}</span>
+          <span>${done ? "Completed today" : "Mark as done"}</span>
+        </button>`;
+      sub = `${total} day${total === 1 ? "" : "s"} logged in total`;
       foot = `<span class="streak-tag">🔥 ${streak(t)} day streak</span>`;
     }
 
@@ -102,41 +114,49 @@ function render() {
       const n = t.history[today] || 0;
       const total = Object.values(t.history).reduce((a, b) => a + b, 0);
       body = `
-        <span class="big-number">${n}</span>
-        <button class="btn-chip" data-a="cnt" data-n="1">+1</button>
-        <button class="btn-chip" data-a="cnt" data-n="5">+5</button>
-        <button class="btn-chip" data-a="cnt" data-n="10">+10</button>
-        <button class="btn-chip" data-a="cnt" data-n="-1">−1</button>`;
-      sub = `Today's count · All-time: ${total}`;
+        <div class="metric"><span class="big-number">${n.toLocaleString()}</span><span class="metric-label">today</span></div>
+        <div class="chip-row">
+          <button class="btn-chip" data-a="cnt" data-n="1">+1</button>
+          <button class="btn-chip" data-a="cnt" data-n="5">+5</button>
+          <button class="btn-chip" data-a="cnt" data-n="10">+10</button>
+          <button class="btn-chip btn-chip-ghost" data-a="cnt" data-n="-1">−1</button>
+        </div>`;
+      foot = `<span class="streak-tag">All-time: ${total.toLocaleString()}</span>`;
     }
 
     if (t.type === "target") {
-      const remaining = t.target - t.progress;
-      const pct = Math.round((t.progress / t.target) * 100);
+      const remaining = Math.max(0, t.target - t.progress);
+      const pct = Math.min(100, Math.round((t.progress / t.target) * 100));
       body = `
-        <span class="big-number">${remaining.toLocaleString()}</span>
-        <button class="btn-chip" data-a="tgt" data-n="1">−1</button>
-        <button class="btn-chip" data-a="tgt" data-n="5">−5</button>
-        <button class="btn-chip" data-a="tgt" data-n="10">−10</button>
-        <button class="btn-chip" data-a="tgt" data-n="25">−25</button>
-        <div class="progress-track" style="width:100%"><div class="progress-fill" style="width:${pct}%"></div></div>`;
+        <div class="metric"><span class="big-number">${remaining.toLocaleString()}</span><span class="metric-label">to go</span></div>
+        <div class="chip-row">
+          <button class="btn-chip" data-a="tgt" data-n="1">−1</button>
+          <button class="btn-chip" data-a="tgt" data-n="5">−5</button>
+          <button class="btn-chip" data-a="tgt" data-n="10">−10</button>
+          <button class="btn-chip" data-a="tgt" data-n="25">−25</button>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>`;
       sub = remaining === 0
         ? `🎉 ${t.year} target of ${t.target.toLocaleString()} completed!`
-        : `Remaining of ${t.target.toLocaleString()} (${t.year}) · ${pct}% done`;
+        : `Goal: ${t.target.toLocaleString()} in ${t.year}`;
+      foot = `<span class="streak-tag">${pct}% complete</span>`;
     }
 
     if (t.type === "cheat") {
-      const left = t.target - t.progress;
+      const left = Math.max(0, t.target - t.progress);
       body = `
-        <span class="big-number">${left}</span>
-        <input class="mini-input" data-i="note" placeholder="Occasion" style="flex:1" />
-        <button class="btn-chip" data-a="cheat" ${left <= 0 ? "disabled" : ""}>Use cheat day</button>`;
-      sub = `Cheat days left in ${t.year} (of ${t.target}) · Used: ${t.progress}`;
+        <div class="metric"><span class="big-number">${left}</span><span class="metric-label">left</span></div>
+        <div class="input-row">
+          <input class="mini-input grow" data-i="note" maxlength="40" placeholder="Occasion (e.g., birthday)" />
+          <button class="btn-chip btn-chip-solid" data-a="cheat" ${left <= 0 ? "disabled" : ""}>Use one</button>
+        </div>`;
+      sub = `Allowance of ${t.target} for ${t.year}`;
       if (t.cheatLog.length) {
-        body += `<ul class="expense-list" style="width:100%">` +
-          t.cheatLog.slice(-5).reverse().map((c) => `<li><span>${c.note}</span><span>${c.date}</span></li>`).join("") +
+        body += `<ul class="log-list">` +
+          t.cheatLog.slice(-5).reverse().map((c) => `<li><span>${escapeHtml(c.note)}</span><span>${c.date}</span></li>`).join("") +
           `</ul>`;
       }
+      foot = `<span class="streak-tag">Used: ${t.progress}</span>`;
     }
 
     if (t.type === "expense") {
@@ -146,16 +166,18 @@ function render() {
         .filter(([k]) => k.slice(0, 7) === today.slice(0, 7))
         .reduce((a, [, list]) => a + list.reduce((x, e) => x + e.amt, 0), 0);
       body = `
-        <span class="big-number">₹${todayTotal.toLocaleString()}</span>
-        <input class="mini-input" data-i="label" placeholder="Item" style="flex:1" />
-        <input class="mini-input" data-i="amt" type="number" min="0" placeholder="₹" />
-        <button class="btn-chip" data-a="exp">Add</button>`;
-      sub = `Spent today · This month: ₹${monthTotal.toLocaleString()}`;
+        <div class="metric"><span class="big-number">₹${todayTotal.toLocaleString()}</span><span class="metric-label">today</span></div>
+        <div class="input-row">
+          <input class="mini-input grow" data-i="label" maxlength="40" placeholder="Item" />
+          <input class="mini-input amt" data-i="amt" type="number" min="0" placeholder="₹" />
+          <button class="btn-chip btn-chip-solid" data-a="exp">Add</button>
+        </div>`;
       if (todayList.length) {
-        body += `<ul class="expense-list" style="width:100%">` +
-          todayList.map((e) => `<li><span>${e.label}</span><span>₹${e.amt}</span></li>`).join("") +
+        body += `<ul class="log-list">` +
+          todayList.map((e) => `<li><span>${escapeHtml(e.label)}</span><span>₹${e.amt.toLocaleString()}</span></li>`).join("") +
           `</ul>`;
       }
+      foot = `<span class="streak-tag">This month: ₹${monthTotal.toLocaleString()}</span>`;
     }
 
     card.innerHTML = `
@@ -166,7 +188,7 @@ function render() {
       </div>
       ${sub ? `<div class="tracker-sub">${sub}</div>` : ""}
       <div class="tracker-body">${body}</div>
-      <div class="tracker-foot">${foot}<button class="btn-delete" title="Delete">🗑</button></div>`;
+      <div class="tracker-foot">${foot}<button class="btn-delete" title="Delete tracker" aria-label="Delete tracker">🗑</button></div>`;
 
     // Wire events
     card.querySelector(".btn-delete").onclick = () => { act.remove(t.id); save(); render(); };
@@ -207,14 +229,37 @@ function renderStats(today) {
   $("#stat-done").textContent = doneToday;
   $("#stat-streak").textContent = best;
   $("#stat-expense").textContent = "₹" + spent.toLocaleString();
+  $("#tracker-count").textContent = trackers.length;
 }
 
 function escapeHtml(s) {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+// ---------- Theme ----------
+const THEME_KEY = "consistency.theme";
+const themeBtn = $("#theme-toggle");
+
+function applyTheme(mode) {
+  document.documentElement.setAttribute("data-theme", mode);
+  themeBtn.textContent = mode === "dark" ? "☀️" : "🌙";
+  themeBtn.setAttribute("aria-label", mode === "dark" ? "Switch to light mode" : "Switch to dark mode");
+}
+
+applyTheme(
+  localStorage.getItem(THEME_KEY) ||
+  (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+);
+
+themeBtn.addEventListener("click", () => {
+  const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  localStorage.setItem(THEME_KEY, next);
+  applyTheme(next);
+});
+
 // Init
 $("#today-date").textContent = new Date().toLocaleDateString(undefined, {
   weekday: "long", month: "long", day: "numeric",
 });
+syncTargetField();
 render();
