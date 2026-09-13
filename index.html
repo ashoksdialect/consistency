@@ -3,80 +3,138 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#6366f1" />
   <title>Consistency — Habit Tracker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div class="bg-decor" aria-hidden="true">
+    <span class="blob blob-a"></span>
+    <span class="blob blob-b"></span>
+  </div>
+
   <header class="header">
     <div class="container header-inner">
       <div class="brand">
         <span class="brand-mark">✓</span>
-        <span class="brand-name">Consistency</span>
+        <span class="brand-text">
+          <span class="brand-name">Consistency</span>
+          <span class="brand-tag">Small steps, every day</span>
+        </span>
       </div>
-      <span id="today-date" class="today-date"></span>
+      <div class="header-actions">
+        <span id="today-date" class="today-date"></span>
+        <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle dark mode">🌙</button>
+      </div>
     </div>
   </header>
 
   <main class="container">
+    <!-- Hero -->
+    <section class="hero">
+      <span class="eyebrow">Habit tracker</span>
+      <h1 class="hero-title">Track what matters,<br /><span class="grad">every single day.</span></h1>
+      <p class="hero-sub">Build streaks, chase yearly targets and keep an eye on spending — everything stays private in your browser.</p>
+    </section>
+
     <!-- Summary blocks -->
     <section class="summary-grid">
-      <div class="block stat-block">
-        <span class="stat-value" id="stat-total">0</span>
-        <span class="stat-label">Trackers</span>
-      </div>
-      <div class="block stat-block">
-        <span class="stat-value" id="stat-done">0</span>
-        <span class="stat-label">Done Today</span>
-      </div>
-      <div class="block stat-block">
-        <span class="stat-value" id="stat-streak">0</span>
-        <span class="stat-label">Best Streak</span>
-      </div>
-      <div class="block stat-block">
-        <span class="stat-value" id="stat-expense">₹0</span>
-        <span class="stat-label">Spent Today</span>
-      </div>
+      <article class="card stat-card">
+        <span class="stat-icon">📦</span>
+        <div class="stat-text">
+          <span class="stat-value" id="stat-total">0</span>
+          <span class="stat-label">Trackers</span>
+        </div>
+      </article>
+      <article class="card stat-card">
+        <span class="stat-icon">✅</span>
+        <div class="stat-text">
+          <span class="stat-value" id="stat-done">0</span>
+          <span class="stat-label">Done today</span>
+        </div>
+      </article>
+      <article class="card stat-card">
+        <span class="stat-icon">🔥</span>
+        <div class="stat-text">
+          <span class="stat-value" id="stat-streak">0</span>
+          <span class="stat-label">Best streak</span>
+        </div>
+      </article>
+      <article class="card stat-card">
+        <span class="stat-icon">💰</span>
+        <div class="stat-text">
+          <span class="stat-value" id="stat-expense">₹0</span>
+          <span class="stat-label">Spent today</span>
+        </div>
+      </article>
     </section>
 
     <!-- Add tracker -->
-    <section class="block add-block">
-      <h2>+ Add a Tracker</h2>
+    <section class="card add-card">
+      <div class="card-head">
+        <h2>Add a tracker</h2>
+        <p>Choose a type, give it a name, and start building momentum.</p>
+      </div>
+
       <form id="tracker-form" autocomplete="off">
-        <div class="form-row">
-          <input type="text" id="tracker-name" placeholder="Name (e.g., Pages Read, Gym)" maxlength="40" required />
-          <select id="tracker-icon">
-            <option value="⭐">⭐</option><option value="📖">📖</option><option value="💪">💪</option>
-            <option value="🏋️">🏋️</option><option value="✍️">✍️</option><option value="💰">💰</option>
-            <option value="🍰">🍰</option><option value="🏃">🏃</option><option value="💧">💧</option>
-            <option value="🧘">🧘</option><option value="💻">💻</option><option value="😴">😴</option>
-          </select>
+        <div class="field-grid">
+          <label class="field field-name">
+            <span class="field-label">Name</span>
+            <input type="text" id="tracker-name" placeholder="e.g., Pages read, Gym" maxlength="40" required />
+          </label>
+
+          <label class="field field-icon">
+            <span class="field-label">Icon</span>
+            <select id="tracker-icon">
+              <option value="⭐">⭐</option><option value="📖">📖</option><option value="💪">💪</option>
+              <option value="🏋️">🏋️</option><option value="✍️">✍️</option><option value="💰">💰</option>
+              <option value="🍰">🍰</option><option value="🏃">🏃</option><option value="💧">💧</option>
+              <option value="🧘">🧘</option><option value="💻">💻</option><option value="😴">😴</option>
+            </select>
+          </label>
+
+          <label class="field field-type">
+            <span class="field-label">Type</span>
+            <select id="tracker-type">
+              <option value="check">✅ Simple check-off — Gym, Writing</option>
+              <option value="counter">🔢 Daily counter — Pages read</option>
+              <option value="target">🎯 Yearly target — 10,000 pushups</option>
+              <option value="cheat">🍰 Cheat-day allowance — Sugar days</option>
+              <option value="expense">💰 Expense tracking</option>
+            </select>
+          </label>
+
+          <label class="field field-target hidden" id="target-field">
+            <span class="field-label">Target</span>
+            <input type="number" id="tracker-target" placeholder="e.g., 10000" min="1" />
+          </label>
         </div>
-        <div class="form-row">
-          <select id="tracker-type">
-            <option value="check">✅ Simple check-off (e.g., Gym, Writing)</option>
-            <option value="counter">🔢 Daily counter (e.g., Pages read)</option>
-            <option value="target">🎯 Yearly countdown target (e.g., 10,000 pushups)</option>
-            <option value="cheat">🍰 Cheat-day allowance (e.g., Sugar days/year)</option>
-            <option value="expense">💰 Expense tracking</option>
-          </select>
-          <input type="number" id="tracker-target" placeholder="Target / Allowance" min="1" class="hidden" />
-        </div>
-        <button type="submit" class="btn-primary">Add Tracker</button>
+
+        <button type="submit" class="btn btn-primary">＋ Add tracker</button>
       </form>
     </section>
 
     <!-- Tracker blocks -->
+    <div class="section-head">
+      <h2>Your trackers</h2>
+      <span class="pill" id="tracker-count">0</span>
+    </div>
+
     <section id="tracker-grid" class="tracker-grid"></section>
-    <div id="empty-state" class="block empty-state">
-      <p>🌱 No trackers yet. Add your first one above!</p>
+
+    <div id="empty-state" class="card empty-state">
+      <span class="empty-emoji">🌱</span>
+      <h3>Nothing here yet</h3>
+      <p>Add your first tracker above and watch the streaks grow.</p>
     </div>
   </main>
 
   <footer class="footer">
     <div class="container">
-      <p>Consistency — small steps, every day. Data stays in your browser.</p>
+      <p>Consistency — small steps, every day. Your data never leaves this browser.</p>
     </div>
   </footer>
 
